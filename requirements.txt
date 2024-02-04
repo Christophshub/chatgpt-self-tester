@@ -3,3 +3,4 @@ pytest
 PyYAML
 numpy
 pandas
+pyarrow

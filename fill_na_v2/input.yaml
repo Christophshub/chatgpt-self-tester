@@ -1,0 +1,6 @@
+name: 'fill_na_v2'
+messages:
+- role: system
+  content: You are a helpful assistant.
+- role: user
+  content: 'I need a python module with a method that accepts a pandas dataframe and goes through all rows and columns and replaces numpy.NaNs with 0'

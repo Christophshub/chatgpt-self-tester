@@ -1,2 +1,2 @@
-def sort_numbers(numbers_list):
-    return sorted(numbers_list)
+def sort_numbers(list_of_numbers):
+    return sorted(list_of_numbers)

@@ -46,21 +46,24 @@ def prune_from_python_encapsulation(code_content):
     if start_idx != -1 and end_idx != -1:
         code_content = code_content[start_idx + len(start_pattern):end_idx]    
     return code_content
-    
-def create_specified_function(folder_name, file_name, prompt):
+
+def create_files(folder_name, file_name, prompt):
     code = generate_code_with_openai(prompt)
     code_content = code.content
-    code_content = prune_from_python_encapsulation(code_content)
-    with open(f"{folder_name}/{file_name}.py", 'w') as file:
-        file.write(str(code_content))
-
-def create_unit_test(folder_name, file_name, test_prompt):
-    test_code = generate_code_with_openai(test_prompt)
-    test_code_content = test_code.content
-    test_code_content = prune_from_python_encapsulation(test_code_content)
-    with open(f"{folder_name}/test_{file_name}.py", 'w') as file:
-        file.write(str(test_code_content))
-
+    separator_pattern = "-----"
+    start_idx = code_content.find(separator_pattern)
+    if start_idx != -1:
+        code_content_1 = code_content[:start_idx]
+        code_content_1 = prune_from_python_encapsulation(code_content_1)
+        with open(f"{folder_name}/{file_name}.py", 'w') as file:
+            file.write(str(code_content_1))
+        code_content_2 =  code_content[start_idx + len(separator_pattern):]
+        code_content_2 = prune_from_python_encapsulation(code_content_2)
+        with open(f"{folder_name}/test_{file_name}.py", 'w') as file:
+            file.write(str(code_content_2))
+    else:
+        raise Exception("separator not found!")
+    
 def generate_code_with_openai(prompt):
     completion = client.chat.completions.create(
         model="gpt-4",
@@ -87,38 +90,18 @@ def main():
     messages = []
     for msg in yaml_content['messages']:
         if msg['role'] == 'user':
-
-            # Add constraints to the user's message if they are not empty
-            #constraints = [yaml_content[key] for key in ['constraint_1', 'constraint_2', 'constraint_3', 'constraint_4', 'constraint_5'] if yaml_content[key]]
-            #msg['content'] += ' ' + ' '.join(constraints).strip()
             msg_content_copy = msg['content']
-            msg['content'] += " Important constraint No. 1: the method should be testtable with a pytest unit test, but the unit test should not be part of your answer."
-            msg['content'] += f" Important constraint No. 2: the method of the testable method should be called '{name}'."
-            msg['content'] += " Important constraint No. 3: I only want the pure python script in your answer, not any explanatory text."
+            msg['content'] += " The following additional requirements obtain: I want the implementation of the requirement and a unit test for it two separate sections of the answer."
+            msg['content'] += " The sections should be separated by -----."
+            msg['content'] += " I should be able to save each of the two sections into a separate python file. The unit test should import the module and the function to be tested"
+            msg['content'] += f" like this: from {name} import {name}. And most importantly, in your answer there should be no additional text whatsoever, only code that can be"
+            msg['content'] += " executed by python, except from the separator -----."
 
         messages.append({"role": msg['role'], "content": msg['content']})
     
     print("will prompt the api with this requirement (messages): ", messages)
-    create_specified_function(folder_name, name, messages)
+    create_files(folder_name, name, messages)
 
-    message_test = []
-    message_test_prefix = """Can you please create a unit test with pytest and add a fixture to the test-method so that the test
-    is immediately executable with the pytest command, for the following functional specification: """
-    for msg_test in yaml_content['messages']:
-        if msg_test['role'] == 'user':
-
-            # Add constraints to the user's message if they are not empty
-            #constraints = [yaml_content[key] for key in ['constraint_1', 'constraint_2', 'constraint_3', 'constraint_4', 'constraint_5'] if yaml_content[key]]
-            #msg['content'] += ' ' + ' '.join(constraints).strip()
-            msg_test['content'] = message_test_prefix + msg_content_copy
-            msg_test['content'] += f" Important constraint No. 1: the method of the existing method to be tested is called '{name}', and '{name}' is also the name of the module that contains the method."
-            msg_test['content'] += " Important constraint No. 2: I only want only THE PYTHON CODE for the unit test in your answer, not any additional text."
-
-        message_test.append({"role": msg_test['role'], "content": msg_test['content']})
-    
-    print("will prompt the api with this requirement for a unit test: ", message_test)
-    create_unit_test(folder_name, name, message_test)
-    
     # Clear the YAML for the next run
     clear_yaml(yaml_content)
     update_yaml(yaml_path, yaml_content)

@@ -1,19 +1,22 @@
-import pandas as pd 
-import numpy as np 
+import pandas as pd
+import numpy as np
 import pytest
-
 from fill_na import fill_na
 
-# Create a fixture
 @pytest.fixture
-def input_data():
-   return pd.DataFrame([[np.nan, 2, np.nan, 0],
-                        [3, 4, np.nan, 1],
-                        [np.nan, np.nan, np.nan, 5],
-                        [np.nan, 3, np.nan, 4]],
-                       columns=list('ABCD'))
+def sample_dataframe():
+    df = pd.DataFrame({
+        'A': [1, 2, np.nan],
+        'B': [4, np.nan, 5],
+        'C': [np.nan, 7, 8]
+    })
+    return df
 
-# Using the fixture in test
-def test_fill_na(input_data):
-    result = fill_na(input_data)
-    assert result.isnull().sum().sum() == 0
+def test_fill_na(sample_dataframe):
+    filled_df = fill_na(sample_dataframe)
+    assert not filled_df.isnull().values.any()
+    assert filled_df.equals(pd.DataFrame({
+        'A': [1, 2, 0],
+        'B': [4, 0, 5],
+        'C': [0, 7, 8],
+    }))
