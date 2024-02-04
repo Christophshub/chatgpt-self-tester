@@ -24,3 +24,12 @@ Execute the unit tests with:
 ```
 pytest
 ```
+
+**remark**: use
+```  
+python main`_v2.py
+```  
+for slightly less flaky results. It lets the AI create the functional implementation and the unit test
+in a single query.   
+(At least the module import for the existing function to be tested by the testing-module works better like this; but especially
+the tests for equality after numpy.NaN replacement are poor, since it fucks up the data types - float vs integer - almost all the time.)
