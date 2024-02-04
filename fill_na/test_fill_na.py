@@ -2,10 +2,7 @@ import pandas as pd
 import numpy as np 
 import pytest
 
-# Creating your module
-def fill_na(df):
-    return df.fillna(0)
-
+from fill_na import fill_na
 
 # Create a fixture
 @pytest.fixture

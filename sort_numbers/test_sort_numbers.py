@@ -1,15 +1,10 @@
-# test_sort_list.py
-
 import pytest
-from sort_numbers import sort_numbers    # adjust this import according to where your sort_numbers method is located
+from sort_numbers import sort_numbers
 
 @pytest.fixture
-def input_data():
-    return [9, 3, 6, 1, 4, 0, 5]
+def sample_numbers():
+    return [6, 5, 3, 1, 8, 7, 2, 4]
 
-@pytest.fixture
-def sorted_data():
-    return [0, 1, 3, 4, 5, 6, 9]
-
-def test_sort_numbers(input_data, sorted_data):
-    assert sort_numbers(input_data) == sorted_data
+def test_sort_numbers(sample_numbers):
+    sorted_numbers = sort_numbers(sample_numbers)
+    assert sorted_numbers == [1, 2, 3, 4, 5, 6, 7, 8]

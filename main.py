@@ -41,6 +41,12 @@ def create_specified_function(folder_name, file_name, prompt):
     end_idx = code_content.rfind(end_pattern)
     if start_idx != -1 and end_idx != -1:
         code_content =  code_content[start_idx + len(start_pattern):end_idx]
+    start_pattern = "```Python"
+    end_pattern = "```"
+    start_idx = code_content.find(start_pattern)
+    end_idx = code_content.rfind(end_pattern)
+    if start_idx != -1 and end_idx != -1:
+        code_content =  code_content[start_idx + len(start_pattern):end_idx]
     with open(f"{folder_name}/{file_name}.py", 'w') as file:
         file.write(str(code_content))
 
@@ -48,6 +54,12 @@ def create_unit_test(folder_name, file_name, test_prompt):
     test_code = generate_code_with_openai(test_prompt)
     test_code_content = test_code.content
     start_pattern = "```python\n"
+    end_pattern = "```"
+    start_idx = test_code_content.find(start_pattern)
+    end_idx = test_code_content.rfind(end_pattern)
+    if start_idx != -1 and end_idx != -1:
+        test_code_content =  test_code_content[start_idx + len(start_pattern):end_idx]
+    start_pattern = "```Python"
     end_pattern = "```"
     start_idx = test_code_content.find(start_pattern)
     end_idx = test_code_content.rfind(end_pattern)
@@ -86,7 +98,7 @@ def main():
             # Add constraints to the user's message if they are not empty
             #constraints = [yaml_content[key] for key in ['constraint_1', 'constraint_2', 'constraint_3', 'constraint_4', 'constraint_5'] if yaml_content[key]]
             #msg['content'] += ' ' + ' '.join(constraints).strip()
-
+            msg_content_copy = msg['content']
             msg['content'] += " Important constraint No. 1: the method should be testtable with a pytest unit test, but the unit test should not be part of your answer."
             msg['content'] += f" Important constraint No. 2: the method of the testable method should be called '{name}'."
             msg['content'] += " Important constraint No. 3: I only want the pure python script in your answer, not any explanatory text."
@@ -97,19 +109,19 @@ def main():
     create_specified_function(folder_name, name, messages)
 
     message_test = []
-    message_test_prefix = """Can you please create a unit test with pytest and add a fixture to the test-method so that the test 
+    message_test_prefix = """Can you please create a unit test with pytest and add a fixture to the test-method so that the test
     is immediately executable with the pytest command, for the following functional specification: """
-    for msg in yaml_content['messages']:
-        if msg['role'] == 'user':
+    for msg_test in yaml_content['messages']:
+        if msg_test['role'] == 'user':
 
             # Add constraints to the user's message if they are not empty
             #constraints = [yaml_content[key] for key in ['constraint_1', 'constraint_2', 'constraint_3', 'constraint_4', 'constraint_5'] if yaml_content[key]]
             #msg['content'] += ' ' + ' '.join(constraints).strip()
+            msg_test['content'] = message_test_prefix + msg_content_copy
+            msg_test['content'] += f" Important constraint No. 1: the method of the existing method to be tested is called '{name}', and '{name}' is also the name of the module that contains the method."
+            msg_test['content'] += " Important constraint No. 2: I only want only THE PYTHON CODE for the unit test in your answer, not any additional text."
 
-            msg['content'] += " Important constraint No. 1: the method of the existing method to be tested is called '{name}', and '{name}' is also the name of the module that contains the method."
-            msg['content'] += " Important constraint No. 2: I only want the PURE PYTHON CODE for the unit test in your answer, not any additional explanatory text."
-
-        message_test.append({"role": msg['role'], "content": message_test_prefix + msg['content']})
+        message_test.append({"role": msg_test['role'], "content": msg_test['content']})
     
     print("will prompt the api with this requirement for a unit test: ", message_test)
     create_unit_test(folder_name, name, message_test)
