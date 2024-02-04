@@ -106,7 +106,7 @@ def main():
             #constraints = [yaml_content[key] for key in ['constraint_1', 'constraint_2', 'constraint_3', 'constraint_4', 'constraint_5'] if yaml_content[key]]
             #msg['content'] += ' ' + ' '.join(constraints).strip()
 
-            msg['content'] += " Important constraint No. 1: the method of the exiting method to be tested is called '{name}', and '{name}' is also the name of the module that contains the method."
+            msg['content'] += " Important constraint No. 1: the method of the existing method to be tested is called '{name}', and '{name}' is also the name of the module that contains the method."
             msg['content'] += " Important constraint No. 2: I only want the PURE PYTHON CODE for the unit test in your answer, not any additional explanatory text."
 
         message_test.append({"role": msg['role'], "content": message_test_prefix + msg['content']})
