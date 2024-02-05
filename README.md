@@ -27,7 +27,7 @@ pytest
 
 **remark**: use
 ```  
-python main`_v2.py
+python main_v2.py
 ```  
 for slightly less flaky results. It lets the AI create the functional implementation and the unit test
 in a single query.   
